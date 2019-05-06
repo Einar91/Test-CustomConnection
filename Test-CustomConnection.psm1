@@ -5,24 +5,20 @@ Start your design with writing out the examples as a functional spesification.
 .DESCRIPTION
 .PARAMETER
 .EXAMPLE
+Test-CustomConnection -ComputerName SRV1 -PING -WinRM -WSMan -Dcom -RDP -ErrorLogFilePath
+.EXAMPLE
+Test-CustomConnection -ComputerName (Get-Content c:\servers.txt) -PING -WinRM -WSMan -Dcom -RDP -ErrorLogFilePath
 #>
 
-function FunctionName {
+function Test-CustomConnection {
     [CmdletBinding()]
     #^ Optional ..Binding(SupportShouldProcess=$True,ConfirmImpact='Low')
     param (
-    <# EXAMPLE PARAMETER
     [Parameter(Mandatory=$True,
         ValueFromPipeline=$True,
         ValueFromPipelineByPropertyName=$True)]
     [Alias('CN','MachineName','HostName','Name')]
-    [string[]]$ComputerName,
-
-    [ValidateSet('WSMan','Dcom')]
-    [string]$Protocol = "Wsman",
-
-    [switch]$ProtocolFallback
-    #>
+    [string[]]$ComputerName
     )
 
 BEGIN {

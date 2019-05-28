@@ -23,13 +23,16 @@ function Test-CustomConnection {
     [string[]]$ComputerName,
 
     [Parameter(Mandatory=$false)]
-    [switch]$Ping,    
+    [switch]$Ping,
 
     [Parameter(Mandatory=$false)]
-    [int32]$PingCount = 2,
+    [int32]$PingCount = 4,
 
     [Parameter(Mandatory=$false)]
-    [int32]$PingBufferSize = 4
+    [int32]$PingBufferSize = 4,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$WsMan
     )
 
 BEGIN {
@@ -49,9 +52,11 @@ PROCESS {
             #Create our object
             $ComputerObj = New-Object psobject -Property @{'ComputerName'=$computer}
             
-            Write-Verbose "$computer is test number $ProgressNum of $ProgressTotal"
+            Write-Verbose "$computer is number $ProgressNum of $ProgressTotal."
 
+            #Run ping test if specified by parameter
             if($PSBoundParameters.ContainsKey('Ping')){
+                Write-Verbose "$computer : running ping test."
                 $PingTest = Test-Connection -ComputerName $computer -BufferSize $PingBufferSize -Count $PingCount -Quiet
 
                 #If pingtest succesfull
@@ -64,6 +69,11 @@ PROCESS {
                     Add-Member -InputObject $ComputerObj -MemberType NoteProperty -Name 'Ping' -Value 'Failed'
                 }
             } #If
+
+            #Run WsMan test if specified by parameter
+            if($PSBoundParameters.ContainsKey('WsMan')){
+                Write-Verbose "$computer : running WsMan test."
+            }
 
             #Output our object to the pipeline
             $ComputerObj

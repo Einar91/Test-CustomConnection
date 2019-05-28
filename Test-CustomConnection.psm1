@@ -7,6 +7,8 @@ Start your design with writing out the examples as a functional spesification.
 .EXAMPLE
 Test-CustomConnection -ComputerName SRV1 -PING -WinRM -WSMan -Dcom -RDP -ErrorLogFilePath
 .EXAMPLE
+Test-CustomConnection -ComputerName SRV1 -Ping -PingBufferSize -PingCount
+.EXAMPLE
 Test-CustomConnection -ComputerName (Get-Content c:\servers.txt) -PING -WinRM -WSMan -Dcom -RDP -ErrorLogFilePath
 #>
 
@@ -18,7 +20,16 @@ function Test-CustomConnection {
         ValueFromPipeline=$True,
         ValueFromPipelineByPropertyName=$True)]
     [Alias('CN','MachineName','HostName','Name')]
-    [string[]]$ComputerName
+    [string[]]$ComputerName,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$Ping,    
+
+    [Parameter(Mandatory=$false)]
+    [int32]$PingCount = 2,
+
+    [Parameter(Mandatory=$false)]
+    [int32]$PingBufferSize = 4
     )
 
 BEGIN {
@@ -28,7 +39,39 @@ BEGIN {
 }
 
 PROCESS {
-    # Provides record-by-record processing for the function.
+    try{
+        #Define a progress variabl
+        $ProgressTotal = ($ComputerName).Count
+        $ProgressNum = 0
+
+        #Check each computer
+        foreach($computer in $ComputerName){
+            #Create our object
+            $ComputerObj = New-Object psobject -Property @{'ComputerName'=$computer}
+            
+            Write-Verbose "$computer is test number $ProgressNum of $ProgressTotal"
+
+            if($PSBoundParameters.ContainsKey('Ping')){
+                $PingTest = Test-Connection -ComputerName $computer -BufferSize $PingBufferSize -Count $PingCount -Quiet
+
+                #If pingtest succesfull
+                if($PingTest){
+                    Add-Member -InputObject $ComputerObj -MemberType NoteProperty -Name 'Ping' -Value 'Succesfull'     
+                } #if
+
+                #If pingtest failed
+                elseif ($pingtest -eq $false){
+                    Add-Member -InputObject $ComputerObj -MemberType NoteProperty -Name 'Ping' -Value 'Failed'
+                }
+            } #If
+
+            #Output our object to the pipeline
+            $ComputerObj
+        } #Foreach computer
+    } #Try
+    Catch{
+
+    } #Catch
 }
 
 

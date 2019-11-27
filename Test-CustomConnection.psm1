@@ -49,6 +49,8 @@ PROCESS {
 
         #Check each computer
         foreach($computer in $ComputerName){
+            $ProgressNum += 1
+            
             #Create our object
             $ComputerObj = New-Object psobject -Property @{'ComputerName'=$computer}
             
